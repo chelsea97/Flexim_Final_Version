@@ -10,5 +10,7 @@ To train user-defined similarity function,install it locally:
 $ cd Flexim_User
 $ python st500_emulate_preprocess.py dataset.csv
 $ python GUI_new.py
+## Run application
 After running GUI_new.py, user can see corresponding Graphical User Interface.
 Then click load button, load dataset from your local directory and you will see corresponding plot of dataset.
+![emulate_user_part](https://user-images.githubusercontent.com/28042893/212110199-f83bbcb7-9266-4ad4-a6e4-ea9b6b374512.png)
