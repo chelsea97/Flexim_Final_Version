@@ -11,4 +11,4 @@ $ cd Flexim_User
 $ python st500_emulate_preprocess.py dataset.csv
 $ python GUI_new.py
 After running GUI_new.py, user can see corresponding Graphical User Interface
-![Image text](emulate_user_part.png)
+![Image text](https://github.com/chelsea97/Flexim_Final_Version/blob/469060c9fb84c60a985792f9f2952f6e5b9e175c/emulate_user_part.png)
