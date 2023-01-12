@@ -1,3 +1,4 @@
+
 # Flexim_Final_Version
 ## Table of Directory
 * [Flexim User](https://github.com/chelsea97/Flexim_Final_Version/tree/main/Flexim_User)
@@ -18,4 +19,4 @@ $ click load button
 $ load dataset from local directory (after loading dataset, user can see corresponding plot on the upperleft position of graphical user interface)
 $ click start button (user can see different linear/non-linear transformation parameter's value which is shown on following figures)
 ```
-![emulate_user_part](https://user-images.githubusercontent.com/28042893/212114911-621dbd4b-a374-4341-8f07-bd97450f8380.png)
+![gui](https://user-images.githubusercontent.com/28042893/212168889-9af1a342-12a7-4d35-a552-afe30f886fbf.png)
