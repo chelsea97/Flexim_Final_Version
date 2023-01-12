@@ -13,7 +13,9 @@ $ python GUI_new.py
 ```
 ## Run application
 After running GUI_new.py, user can see corresponding Graphical User Interface.
+```
 $ click load button
 $ load dataset from local directory (after loading dataset, user can see corresponding plot on the upperleft position of graphical user interface)
 $ click start button (user can see different linear/non-linear transformation parameter's value which is shown on following figures)
+```
 ![emulate_user_part](https://user-images.githubusercontent.com/28042893/212114911-621dbd4b-a374-4341-8f07-bd97450f8380.png)
