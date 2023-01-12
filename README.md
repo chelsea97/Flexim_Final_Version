@@ -11,4 +11,4 @@ $ cd Flexim_User
 $ python st500_emulate_preprocess.py dataset.csv
 $ python GUI_new.py
 After running GUI_new.py, user can see corresponding Graphical User Interface.
-![image](https://raw.githubusercontent.com/chelsea97/Flexim_Final_Version/main/emulate_user_part.png)
+Then click load button, load dataset from your local directory and you will see corresponding plot of dataset.
