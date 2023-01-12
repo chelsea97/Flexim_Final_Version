@@ -10,5 +10,5 @@ To train user-defined similarity function,install it locally:
 $ cd Flexim_User
 $ python st500_emulate_preprocess.py dataset.csv
 $ python GUI_new.py
-After running GUI_new.py, user can see corresponding Graphical User Interface
-![Image text](https://github.com/chelsea97/Flexim_Final_Version/blob/main/emulate_user_part.png)
+After running GUI_new.py, user can see corresponding Graphical User Interface.
+![image](https://github.com/chelsea97/Flexim_Final_Version/blob/main/emulate_user_part.png)
