@@ -4,7 +4,7 @@
 * [Flexim User](https://github.com/chelsea97/Flexim_Final_Version/tree/main/Flexim_User)
 * [Flexim Object](https://github.com/chelsea97/Flexim_Final_Version/tree/main/Flexim_object)
 ## General info
-This project has two components, Flexim_User and Flexim_object. Flexim_object directory describe component of research project that uses Flexim to emulate objective similarity metrics, such as Euclidean distance, Dynamic Time Wrapping. The other directory Flexim_User corresponds to research component that uses Flexim to emulate user-defined similarity metrics. For component of emulating user-defined similarity , user can load dataset and interact with Flexim's Graphical User Interface to train corresponding neural network model in order to capture user-defined similarity metric. 
+There are two components to this project: Flexim User and Flexim object. Flexim object directory describes research project component that employs Flexim to emulate objective similarity metrics, such as Euclidean distance and Dynamic Time Wrapping. The Flexim User directory corresponds to a research component that uses Flexim to emulate user-defined similarity metrics. User can load dataset and interact with Flexim's Graphical User Interface to train neural network model to capture user-defined similarity metric.
 ## Setup
 To train user-defined similarity function,install it locally:
 ```
