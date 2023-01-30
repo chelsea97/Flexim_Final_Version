@@ -46,3 +46,4 @@ def plot_compare_curve(dataset,query_start, query_end, result_start, result_end,
     fig.savefig("compare_{}.png".format(num))
     fig.tight_layout()
     plt.show()
+    
