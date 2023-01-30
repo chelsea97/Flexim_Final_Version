@@ -158,7 +158,7 @@ class Pattern_Search:
                     #print('yes')
                     #print("len of similar_pattern of main function {}".format(len(similar_pattern)))
                     similarity_score = dtw.distance(query_pattern,similar_pattern)
-                    print("DTW similarity score is {}".format(similarity_score))
+                    #print("DTW similarity score is {}".format(similarity_score))
                     #print("similarity_score is".format(similarity_score))
                     #print("similarity_score is {}".format(similarity_score))
                     if similarity_score >= 0:

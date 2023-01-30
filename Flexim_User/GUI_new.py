@@ -224,7 +224,7 @@ class GUI:
     def plot_sample(self, original, transform):
         self.ax[1].clear()
         self.ax[1].plot(original, ls='--')
-        self.ax[1].set_ylim([-1.5,1.5])
+        #self.ax[1].set_ylim([-1.5,1.5])
         self.ax[1].set_xlim([-self.core.sample_size, 2*self.core.sample_size])
         if transform is not None:
             #print(transform)

@@ -23,32 +23,14 @@ import joblib
 from sklearn.preprocessing import MinMaxScaler
 
 class NN:
-    def __init__(self,instance_1,instance_2,label,
-                 sample_size,validation_data_origin,validation_data_transform,validation_data_label,class_weight):
+    def __init__(self,instance,label,
+                 sample_size,validation_data,class_weight):
         print("use bias is False")
-        gamma = 17
-        label_smoothing = 0
-        self.sample_size = sample_size
-        print("gamma is {}".format(gamma))
-        print("label smoothing is {}".format(label_smoothing))
-        # self.model = tf.keras.Sequential([
-        #     tf.keras.layers.Dense(32,activation = 'relu'),
-        #     tf.keras.layers.Dense(16,activation = 'relu'),
-        #     tf.keras.layers.Dense(8,activation = 'relu'),
-        #     tf.keras.layers.Dense(4,activation = 'relu'),
-        #     # tf.keras.layers.Dense(2,activation = 'softmax')
-        #     tf.keras.layers.Dense(2,activation = 'softmax')  
-        # ])
-        # self.model.compile(
-        #     loss=tf.keras.losses.CategoricalCrossentropy(),
-        #     #loss = tf.keras.losses.MeanAbsoluteError(),
-        #     optimizer=tf.keras.optimizers.Adam(learning_rate=0.001),
-        #     metrics=[tf.keras.metrics.CategoricalAccuracy(name='accuracy')]
-        #     #metrics = [tf.keras.metrics.MeanAbsolteError(name = 'accuracy')]
-        # )
-        # self.model.fit(self.instance, to_categorical(self.label,num_classes = 2),
-        #                epochs=2, batch_size=20)
-        
+        # gamma = 17
+        # label_smoothing = 0
+        # self.sample_size = sample_size
+        # print("gamma is {}".format(gamma))
+        # print("label smoothing is {}".format(label_smoothing))
         '''
         self.model = tf.keras.Sequential()
         self.model.add(tf.keras.layers.Reshape((1,2*self.sample_size)))
@@ -59,6 +41,7 @@ class NN:
         self.model.add(tf.keras.layers.GlobalAveragePooling1D())
         self.model.add(tf.keras.layers.Dropout(0.5))
         self.model.add(tf.keras.layers.Dense(2,activation = 'softmax'))
+        '''
         '''
         print("version 1")
         input1 = tf.keras.layers.Input(shape = (sample_size,))
@@ -82,6 +65,42 @@ class NN:
             ]
         )
         self.model.fit([instance_1,instance_2],label,epochs = 10,validation_data = ([validation_data_origin,validation_data_transform],validation_data_label),shuffle = True, class_weight = class_weight)
+        '''
+        self.instance = instance
+        self.label = label
+        self.sample_size = sample_size
+        self.validation_data = validation_data
+        gamma = 21
+        label_smoothing = 0.8
+        self.model = tf.keras.Sequential()
+        self.model.add(tf.keras.layers.Reshape(
+            (self.sample_size, 2), input_shape=(2*sample_size,)))
+        self.model.add(tf.keras.layers.Conv1D(
+            8, 5, activation='relu', input_shape=(self.sample_size, 2)))
+        #self.model.add(tf.keras.layers.Conv1D(8, 5, activation='relu'))
+        self.model.add(tf.keras.layers.MaxPool1D(3))
+        self.model.add(tf.keras.layers.Conv1D(16, 5, activation='relu'))
+        #self.model.add(tf.keras.layers.Conv1D(256, 5, activation='relu'))
+        self.model.add(tf.keras.layers.GlobalAveragePooling1D())
+        #self.model.add(tf.keras.layers.Dropout(0.5))
+        self.model.add(tf.keras.layers.Dense(1, activation='sigmoid', use_bias = False))
+        # self.model.compile(
+        #     loss =tf.keras.losses.CategoricalCrossentropy(),
+        #     optimizer=tf.keras.optimizers.Adam(learning_rate=0.001),
+        #     metrics = [tf.keras.metrics.CategoricalAccuracy(name = 'accuracy')]
+        # )
+        self.model.compile(
+            loss=tf.keras.losses.BinaryFocalCrossentropy(gamma = gamma,label_smoothing = label_smoothing),
+            optimizer=tf.keras.optimizers.Adam(learning_rate=1e-3),
+            metrics=[
+                tf.keras.metrics.BinaryAccuracy(name='accuracy'),
+                tf.keras.metrics.Precision(name='precision'),
+                tf.keras.metrics.Recall(name='recall')
+            ]
+        )
+        
+        self.model.fit(self.instance, self.label, epochs=10,
+                       validation_data = self.validation_data, shuffle=True, class_weight=class_weight)
         # self.model = tf.keras.Sequential()
         # self.model.add(tf.keras.layers.Reshape((self.sample_size,2),input_shape = (2*sample_size,)))
         # self.model.add(tf.keras.layers.Conv1D(

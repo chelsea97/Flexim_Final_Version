@@ -32,6 +32,7 @@ from NN import NN as nn
 import joblib
 from pattern_search import Pattern_Search as ps
 from sklearn.model_selection import train_test_split
+import sys
 
 class Core_Test:
     def __init__(self, caller, delta=0.1, n_points=1000):
@@ -304,7 +305,7 @@ class Core_Test:
                         self.active_learning_validate = True
                         print("accuracy reaches 85%")
                             
-                if self.active_counter >= self.unlabeled.shape[0] and self.nece_label_time == self.active_lr.mx_iter:
+                elif self.active_counter >= self.unlabeled.shape[0] and self.nece_label_time == self.active_lr.mx_iter:
                     print("enter condition 2")
                     labels = np.array(self.labels)
                     self.labels = []
@@ -315,7 +316,7 @@ class Core_Test:
                     self.nece_label_time = 0
                     print("finish active learning in validation process")
                     self.active_learning_validate = True
-                if not(self.active_learning_validate):
+                elif not(self.active_learning_validate):
                     print("enter condition 3")
                     print("get label is {}".format(self.label.get()))
                     self.labels.append(self.label.get())
@@ -332,24 +333,39 @@ class Core_Test:
                 #need to filter out not timestamp sorted samples
                 else:
                     self.caller.deactivate_buttons()
-                    predict_label_valid = self.active_lr.predict(self.un_final_valid_complex).reshape(-1,1)
-                    self.validate_array = np.concatenate((self.un_final_valid_complex,predict_label_valid),axis = 1)
-                    predict_label_test = self.active_lr.predict(self.un_final_test_complex).reshape(-1,1)
-                    self.test_array = np.concatenate((self.un_final_test_complex,predict_label_test),axis = 1)
+                    # predict_label_valid = self.active_lr.predict(self.un_final_valid_complex).reshape(-1,1)
+                    # self.validate_array = np.concatenate((self.un_final_valid_complex,predict_label_valid),axis = 1)
+                    # predict_label_test = self.active_lr.predict(self.un_final_test_complex).reshape(-1,1)
+                    # self.test_array = np.concatenate((self.un_final_test_complex,predict_label_test),axis = 1)
+                    # predict_label_train = self.active_lr.predict(self.un_final_train_complex).reshape(-1,1)
+                    # self.train_array = np.concatenate((self.un_final_train_complex,predict_label_train),axis = 1)
+                    # print("append query list into train array")
+                    #self.train_array = np.concatenate((self.train_array,self.query_list),axis = 0)
+                    self.original_train_array,self.transform_train_array,self.un_final_train_complex = self.transform_complex_points_2(self.un_final_train_complex)
+                    self.original_valid_array,self.transform_valid_array,self.un_final_valid_complex = self.transform_complex_points_2(self.un_final_valid_complex)
+                    self.original_test_array,self.transform_test_array,self.un_final_test_complex = self.transform_complex_points_2(self.un_final_test_complex)
                     predict_label_train = self.active_lr.predict(self.un_final_train_complex).reshape(-1,1)
-                    self.train_array = np.concatenate((self.un_final_train_complex,predict_label_train),axis = 1)
-                    print("append query list into train array")
-                    self.train_array = np.concatenate((self.train_array,self.query_list),axis = 0)
-                    self.original_train_array,self.transform_train_array = self.transform_complex_points_2(self.train_array)
-                    self.original_valid_array,self.transform_valid_array = self.transform_complex_points_2(self.validate_array)
-                    self.original_test_array,self.transform_test_array = self.transform_complex_points_2(self.test_array)
-                    
+                    predict_label_valid = self.active_lr.predict(self.un_final_valid_complex).reshape(-1,1)
+                    predict_label_test = self.active_lr.predict(self.un_final_test_complex).reshape(-1,1)
                     self.caller.activate_data_generator(3000*self.cluster_number)
                     self.total_original_table = np.concatenate((self.original_train_array,self.final_original_result_table),axis = 0)
                     self.total_transform_table = np.concatenate((self.transform_train_array,self.final_transform_result_table),axis = 0)
-                    self.total_label_table = np.concatenate((predict_label_train,self.final_label_result_table),axis = 0)
-                     
+                    self.total_train_table = np.concatenate((self.total_original_table,self.total_transform_table),axis = 1)
+                    self.total_validate_table = np.concatenate((self.original_valid_array,self.transform_valid_array),axis = 1)
+                    print("total_original_table shape is {}".format(self.total_original_table.shape))
+                    print("final original result table shape is {}".format(self.final_original_result_table.shape))
+                    print("predict label train shape is {}".format(predict_label_train.shape))
+                    print("label result table shape is {}".format(self.final_label_result_table.shape))
+                    self.total_label_table = np.concatenate((predict_label_train,self.final_label_result_table.reshape(-1,1)),axis = 0)
+                    #self.total_naive_table = np.concatenate((self.final_original_result_table,self.final_transform_result_table),axis = 1)
                     #self.total_train_table = np.concatenate((self.transform_train_array,self.final_naive_result_table),axis = 0)
+                    self.save()
+                    print("save basic data")
+                    np.savetxt('generated_train_data.csv', X = self.total_train_table,fmt = '%.4f',delimiter = ',')
+                    np.savetxt('generated_train_label.csv', X = self.total_label_table, fmt = '%.4f',delimiter = ',')
+                    np.savetxt('generated_validate_data.csv', X = self.total_validate_table, fmt = '%.4f',delimiter = ',')
+                    np.savetxt('generated_validate_label.csv', X = predict_label_valid,fmt = '%.4f',delimiter = ',')
+                    print("save following data")
                     neg = self.total_label_table[self.total_label_table < 0.5].shape[0]
                     pos = self.total_label_table[self.total_label_table >= 0.5].shape[0]
                     total = neg + pos
@@ -360,8 +376,12 @@ class Core_Test:
                     class_weight = {0:weight_for_0,1:weight_for_1}
                     # print("train data instance shape is {}".format(self.total_train_table[:,0:-1].shape))
                     # print("train data label shape is {}".format(self.total_train_table[:,-1].shape))
-                    self.neural_network_train(self.total_original_table,self.total_transform_table,self.total_label_table,self.sample_size,self.original_valid_array,self.transform_valid_array,predict_label_valid,class_weight=class_weight)
+                    print("total train table shape is {}".format(self.total_train_table.shape))
+                    print("total label table is {}".format(self.total_label_table.shape))
+                    print("total validate table shape is {}".format(self.total_validate_table.shape))
+                    self.neural_network_train(self.total_train_table,self.total_label_table,self.sample_size,(self.total_validate_table,predict_label_valid),class_weight=class_weight)
                     self.pattern_search_show(query_start=50,kvalue=5)
+                    sys.exit()
             else:
                 self.current_cluster += 1
                 self.resample()
@@ -643,7 +663,7 @@ class Core_Test:
         return transform_table
     
     def transform_complex_points_2(self,alpha_array):
-        without_label_array = alpha_array[:,0:-1]
+        without_label_array = alpha_array
         original_table = np.random.uniform(size = (len(alpha_array),self.sample_size))
         transform_table = np.random.uniform(size = (len(alpha_array),self.sample_size))
         terrible_timestamp = []
@@ -661,7 +681,8 @@ class Core_Test:
             transform_table[i,:] = transform_pattern
         original_table = np.delete(original_table,terrible_timestamp,axis = 0)
         transform_table = np.delete(transform_table,terrible_timestamp,axis = 0)
-        return original_table,transform_table
+        alpha_array = np.delete(alpha_array,terrible_timestamp,axis = 0)
+        return original_table,transform_table,alpha_array
             
         
         
@@ -807,6 +828,8 @@ class Core_Test:
         #self.set_alphas([(random.random()*2)-1 for i in range(len(self.params_lin))], [(random.random()*2)-1 for i in range(len(self.params_non_lin))])
         #self.action()
         
+    
+        
     def action(self):
         if self.original is not None:
             transform = self.original
@@ -818,7 +841,7 @@ class Core_Test:
             x = x.reshape((2, -1))
             #print("x is {}".format(x))
             #why define it in this way
-            A = np.array([[a+1, b * self.original.shape[0]], [c/10, d+1]])
+            A = np.array([[a+1, b * self.original.shape[0]], [c/500, d+1]])
             #print("A is {}".format(A))
             B = np.array([[e * self.original.shape[0], f]])
             #print("B is {}".format(B))
@@ -852,7 +875,7 @@ class Core_Test:
             change_transform = np.random.rand(len(transform),2)
             for i in range(len(change_transform)):
                 change_transform[i,0] = 0+i*gap
-                change_transform[i,1] = random.uniform(-0.5,0.5)
+                change_transform[i,1] = random.uniform(-0.005,0.005)
             return change_transform
         if transform[0,0]-gap>0:
             print("run second condition")
@@ -862,7 +885,7 @@ class Core_Test:
             change_transform = np.random.rand(int(n),2)
             for i in range(0,n-1):
                 change_transform[i,0] = 0+i*gap
-                change_transform[i, 1] = random.uniform(-0.5, 0.5)
+                change_transform[i, 1] = random.uniform(-0.005, 0.005)
             # change_transform = np.concatenate((change_transform,transform),axis = 0)
             change_transform[n-1,0] = 0 + (n-1)*gap
             change_transform[n-1,1] = transform[0,1]
@@ -877,7 +900,7 @@ class Core_Test:
             change_transform[0, 1] = transform[-1,1]
             for i in range(1,n):
                 change_transform[i,0] = transform[-1,0]+ i*gap
-                change_transform[i,1] = random.uniform(-0.5,0.5)
+                change_transform[i,1] = random.uniform(-0.005,0.005)
             # change_transform = np.concatenate((transform,change_transform),axis = 0)
             return change_transform
         else:
@@ -895,7 +918,7 @@ class Core_Test:
             change_transform = np.random.rand(len(transform),2)
             for i in range(len(change_transform)):
                 change_transform[i,0] = 0+ i*gap
-                change_transform[i,1] = random.uniform(-0.5,0.5)
+                change_transform[i,1] = random.uniform(-0.005,0.005)
             return change_transform
         
         elif transform[0,0] - gap >= 0 and transform[-1,0] > 50:
@@ -904,7 +927,7 @@ class Core_Test:
             change_transform = np.random.rand(n,2)
             for i in range(0,n-1):
                 change_transform[i,0] = 0 + i*gap
-                change_transform[i,1] = random.uniform(-0.5,0.5)
+                change_transform[i,1] = transform[0, 1]+random.uniform(-0.005,0.005)
             change_transform[n-1,0] = 0 + (n-1)*gap
             change_transform[n-1, 1] = transform[0, 1]
             for i in range(len(transform)-1,-1,-1):
@@ -923,7 +946,7 @@ class Core_Test:
             change_transform[0, 1] = transform[-1, 1]
             for i in range(1, n):
                 change_transform[i, 0] = transform[-1, 0] + i*gap
-                change_transform[i, 1] = random.uniform(-0.5, 0.5)
+                change_transform[i, 1] = transform[-1,1] + random.uniform(-0.005, 0.005)
             for i in range(0,len(transform)):
                 if transform[i,0] < 0:
                     index_value = i
@@ -942,26 +965,26 @@ class Core_Test:
                 change_transform_n = np.random.rand(n,2)
                 for i in range(n):
                     change_transform_n[i,0] = 0 + i*gap
-                    change_transform_n[i, 1] = random.uniform(-0.5, 0.5)
+                    change_transform_n[i, 1] = transform[0,1]+random.uniform(-0.005, 0.005)
                 change_transform = np.concatenate((change_transform_n,transform),axis = 0)
                 return change_transform
             elif m!=0 and n == 0:
                 change_transform_m = np.random.rand(m,2)
                 for j in range(m):
                     change_transform_m[j,0] = transform[-1,0] + j*gap
-                    change_transform_m[j,1] = random.uniform(-0.5,0.5)
+                    change_transform_m[j,1] = transform[-1,1]+random.uniform(-0.005,0.005)
                 change_transform = np.concatenate((transform,change_transform_m),axis = 0)
                 return change_transform
             elif m!= 0 and n!=0:
                 change_transform_n = np.random.rand(n, 2)
                 for i in range(n):
                     change_transform_n[i, 0] = 0 + i*gap
-                    change_transform_n[i, 1] = random.uniform(-0.5, 0.5)
+                    change_transform_n[i, 1] = transform[0,1]+random.uniform(-0.005, 0.005)
                 change_transform = np.concatenate((change_transform_n, transform), axis=0)
                 change_transform_m = np.random.rand(m, 2)
                 for j in range(m):
-                    change_transform_m[j, 0] = transform[-1, 0] + j*gap
-                    change_transform_m[j, 1] = random.uniform(-0.5, 0.5)
+                    change_transform_m[j, 0] = transform[-1,0] + j*gap
+                    change_transform_m[j, 1] = transform[-1,1]+random.uniform(-0.005, 0.005)
                 change_transform = np.concatenate((transform, change_transform_m), axis=0)
                 return change_transform
             else:

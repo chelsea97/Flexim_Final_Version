@@ -34,12 +34,12 @@ class Active:
         self.nn_estimator_model_l2 = tf.keras.models.load_model("./"+str(1)+str(5)+'/saved_model'+str(60)+'/'+'model_1')
         self.nn_estimator_model_dtw = tf.keras.models.load_model("./"+str(3)+str(5)+'/saved_model'+str(60)+'/'+'model_1')
         self.nn_estimator_model_cosine = tf.keras.models.load_model("./"+str(2)+str(5)+'/saved_model'+str(60)+'/'+'model_1')
-        estimator_list = [('l2 model',KerasClassifier(self.nn_estimator_model_l2))]
-        #estimator_list = [('l2 model',KerasClassifier(self.nn_estimator_model_l2)),('cosine',KerasClassifier(self.nn_estimator_model_cosine)),('dtw',KerasClassifier(self.nn_estimator_model_dtw))]
+        #estimator_list = [('l2 model',KerasClassifier(self.nn_estimator_model_l2))]
+        estimator_list = [('l2 model',KerasClassifier(self.nn_estimator_model_l2)),('cosine',KerasClassifier(self.nn_estimator_model_cosine)),('dtw',KerasClassifier(self.nn_estimator_model_dtw))]
         #self.nn_estimator_model.fit(labeled_data[training_indices,0:-1],labeled_data[training_indices,-1])
         #self.learner = ActiveLearner(estimator = KerasClassifier(self.nn_estimator_model), query_strategy=preset_batch, X_training=self.train_label[:,0:-1], y_training=self.train_label[:,-1],verbose = 1)
-        self.learner = ActiveLearner(estimator = KerasClassifier(self.nn_estimator_model_dtw),query_strategy = preset_batch,X_training = self.train_label[:,0:-1],y_training = self.train_label[:,-1])
-        #self.learner = ActiveLearner(estimator = StackingClassifier(estimators = estimator_list,final_estimator = LogisticRegression(),stack_method = 'predict_proba'),query_strategy = preset_batch, X_training = self.train_label[:,0:-1], y_training = self.train_label[:,-1])
+        #self.learner = ActiveLearner(estimator = KerasClassifier(self.nn_estimator_model_dtw),query_strategy = preset_batch,X_training = self.train_label[:,0:-1],y_training = self.train_label[:,-1])
+        self.learner = ActiveLearner(estimator = StackingClassifier(estimators = estimator_list,final_estimator = LogisticRegression(),stack_method = 'predict_proba'),query_strategy = preset_batch, X_training = self.train_label[:,0:-1], y_training = self.train_label[:,-1])
         self.learner.teach(X = self.train_label[:,0:-1],y = self.train_label[:,-1])
         self.query_time = 0
         
