@@ -33,6 +33,8 @@ import joblib
 from pattern_search import Pattern_Search as ps
 from sklearn.model_selection import train_test_split
 import sys
+from GUI_show import GUI_show
+from emulate_NN import emulate_NN as enn
 
 class Core_Test:
     def __init__(self, caller, delta=0.1, n_points=1000):
@@ -192,7 +194,6 @@ class Core_Test:
                 self.active_lr.train_label, self.active_lr.test_label = train_test_split(labeled,test_size = 0.2,random_state = 42,shuffle = None)
                 self.active_lr.train_label, self.active_lr.valid_label = train_test_split(self.active_lr.train_label,test_size = 0.2, random_state = 44, shuffle = None)
                 self.active_lr.learner.teach(X = self.active_lr.train_label[:,0:-1],y = self.active_lr.train_label[:,-1])
-                self.active_lr.mx_iter = 1
                 self.active_lr.un_label_data = unlabeled
             global query_list
             self.unlabeled = self.active_lr.query() #use query method to get unlabeled uncertainty data
@@ -331,7 +332,7 @@ class Core_Test:
                     self.original = self.data[original_index:original_index+self.sample_size]
                     print("change original function")
                 #need to filter out not timestamp sorted samples
-                else:
+                if self.active_learning_validate:
                     self.caller.deactivate_buttons()
                     # predict_label_valid = self.active_lr.predict(self.un_final_valid_complex).reshape(-1,1)
                     # self.validate_array = np.concatenate((self.un_final_valid_complex,predict_label_valid),axis = 1)
@@ -350,21 +351,43 @@ class Core_Test:
                     self.caller.activate_data_generator(3000*self.cluster_number)
                     self.total_original_table = np.concatenate((self.original_train_array,self.final_original_result_table),axis = 0)
                     self.total_transform_table = np.concatenate((self.transform_train_array,self.final_transform_result_table),axis = 0)
-                    self.total_train_table = np.concatenate((self.total_original_table,self.total_transform_table),axis = 1)
+                    
+                    self.train_without_naive = np.concatenate((self.original_train_array,self.transform_train_array),axis = 1)
+                    self.train_without_naive = self.transform(self.train_without_naive)
+                    self.total_train_table = self.train_without_naive
                     self.total_validate_table = np.concatenate((self.original_valid_array,self.transform_valid_array),axis = 1)
+                    self.total_validate_table = self.transform(self.total_validate_table)
                     print("total_original_table shape is {}".format(self.total_original_table.shape))
                     print("final original result table shape is {}".format(self.final_original_result_table.shape))
                     print("predict label train shape is {}".format(predict_label_train.shape))
                     print("label result table shape is {}".format(self.final_label_result_table.shape))
-                    self.total_label_table = np.concatenate((predict_label_train,self.final_label_result_table.reshape(-1,1)),axis = 0)
+                    #self.total_label_table = np.concatenate((predict_label_train,self.final_label_result_table.reshape(-1,1)),axis = 0)
+                    self.total_label_table = predict_label_train
+                    
+                    
+                    #train emualte nn model
+                    print("train emulate nn model")
+                    self.emulate_nn_train(self.train_without_naive,self.un_final_train_complex[:,1:],self.sample_size,self.total_validate_table,self.un_final_valid_complex[:,1:])
+                    print("emulate nn model train finished")
+                    self.emulate_neural_network.model.save('saved_model/mx_iter_5/emulate_nn_model_2')
+                    
+                    self.total_test_table = np.concatenate((self.original_test_array,self.transform_test_array),axis = 1)
+                    self.total_test_table = self.transform(self.total_test_table)
+                    emulate_para_vector = self.emulate_neural_network.model.predict(self.total_test_table)
+                    true_para_vector = self.un_final_test_complex[:,1:]
+                    average_l1_score = self.get_l1_score(emulate_para_vector,true_para_vector)
+                    print("average l1 score is {}".format(average_l1_score))
                     #self.total_naive_table = np.concatenate((self.final_original_result_table,self.final_transform_result_table),axis = 1)
                     #self.total_train_table = np.concatenate((self.transform_train_array,self.final_naive_result_table),axis = 0)
-                    self.save()
-                    print("save basic data")
-                    np.savetxt('generated_train_data.csv', X = self.total_train_table,fmt = '%.4f',delimiter = ',')
-                    np.savetxt('generated_train_label.csv', X = self.total_label_table, fmt = '%.4f',delimiter = ',')
-                    np.savetxt('generated_validate_data.csv', X = self.total_validate_table, fmt = '%.4f',delimiter = ',')
-                    np.savetxt('generated_validate_label.csv', X = predict_label_valid,fmt = '%.4f',delimiter = ',')
+                    # print("save basic data")
+                    np.savetxt('generated_original_train_data_new_200000.csv', X = self.original_train_array,fmt = '%.4f',delimiter = ',')
+                    np.savetxt('generated_transform_train_data_new_200000.csv', X = self.transform_train_array,fmt = '%.4f',delimiter = ',')
+                    np.savetxt('generated_original_validate_data_new_200000.csv',X = self.original_valid_array,fmt = '%.4f',delimiter = ',')
+                    np.savetxt('generated_transform_validate_data_new_200000.csv',X = self.transform_valid_array,fmt = '%.4f',delimiter = ',')
+                    np.savetxt('generated_original_test_data_new_200000.csv',X = self.original_test_array,fmt = '%.4f',delimiter = ',')
+                    np.savetxt('generated_transform_test_data_new_200000.csv',X = self.transform_test_array,fmt = '%.4f',delimiter = ',')
+                    np.savetxt('generated_test_parameter_new_200000.csv', X = true_para_vector,fmt = '%.4f',delimiter = ',')
+                    
                     print("save following data")
                     neg = self.total_label_table[self.total_label_table < 0.5].shape[0]
                     pos = self.total_label_table[self.total_label_table >= 0.5].shape[0]
@@ -380,7 +403,10 @@ class Core_Test:
                     print("total label table is {}".format(self.total_label_table.shape))
                     print("total validate table shape is {}".format(self.total_validate_table.shape))
                     self.neural_network_train(self.total_train_table,self.total_label_table,self.sample_size,(self.total_validate_table,predict_label_valid),class_weight=class_weight)
-                    self.pattern_search_show(query_start=50,kvalue=5)
+                    self.neural_network.model.save('saved_model/mx_iter_5/my_model_4')
+                    query_start = 200000
+                    score_cosine_index_start,score_dtw_index_start,score_flexim_index_start = self.pattern_search_show(query_start,kvalue=5)
+                    gui_show = GUI_show(self.data,self.sample_size,query_start,score_cosine_index_start,score_dtw_index_start,score_flexim_index_start)
                     sys.exit()
             else:
                 self.current_cluster += 1
@@ -429,10 +455,20 @@ class Core_Test:
         score_flexim_index_start,score_flexim_index_end = self.ps.record_index(score_flexim)
         print("score flexim start is {}".format(score_flexim_index_start))
         print("score flexim end is {}".format(score_flexim_index_end))
+        return score_cosine_index_start,score_dtw_index_start,score_flexim_index_start
         #self.ps.plot_compare_curve(query_start,query_start+self.ps.sample_size,score_cosine_index_start,score_cosine_index_end,1)
         #self.ps.plot_compare_curve(query_start,query_start+self.ps.sample_size,score_dtw_index_start,score_dtw_index_end,2)
         #self.ps.plot_compare_curve(query_start,query_start+self.ps.sample_size,score_flexim_index_start,score_flexim_index_end,3)
-        
+    
+    def get_l1_score(self,A1,A2):
+        score_list = []
+        for i in range(A1.shape[0]):
+            original_vector = A1[i,:]
+            predict_vector = A2[i,:]
+            l1_distance = np.linalg.norm(original_vector - predict_vector,ord = 1)
+            score_list.append(l1_distance)
+        l1_average_score = sum(score_list)/A1.shape[0]
+        return l1_average_score
         
     def gen_naive_params(self,positive):
         # naives = []
@@ -692,6 +728,13 @@ class Core_Test:
         self.neural_network = nn(instance,label,sample_size,validation_data,class_weight)
         self.neural_network_model = self.neural_network.model
         print("finish train model")
+        
+    def emulate_nn_train(self,instance,vector,sample_size,validation_data,validation_data_vector):
+        print("begin train emulate nn model")
+        self.emulate_neural_network = enn(instance,vector,sample_size,validation_data,validation_data_vector)
+        self.emulate_neural_network_model = self.emulate_neural_network.model
+        print("finish train emulate neural network model")
+        
     
     def neural_network_predict(self,X):
         similarity_score = self.neural_network.nn_predict(X)
@@ -1001,12 +1044,25 @@ class Core_Test:
                 if transform[j,0] <=50:
                     index_value_2 = j
                     break
-            transform = np.delete(transform,slice(i,j+1),0)
-            return transform
+            #transform = np.delete(transform,slice(index_value_1,index_value_2+1),0)
+            change_transform = transform[index_value_1+1:index_value_2,:]
+            return change_transform
         else:
             #print("retransform_2 condition 6")
             return transform 
         
+    def transform(self,original_data):
+        convert_list = []
+        for i in range(len(original_data)):
+            original_row = original_data[i,0:self.sample_size].tolist()
+            transform_row = original_data[i,self.sample_size:2*self.sample_size].tolist()
+            row_list = []
+            for j in range(len(original_row)):
+                row_list.append(original_row.pop(0))
+                row_list.append(transform_row.pop(0))
+            convert_list.append(row_list)
+        convert_list = np.array(convert_list)
+        return convert_list
         
     def remove_unsort(self,para):
         problem_index_list = []
@@ -1016,7 +1072,7 @@ class Core_Test:
             #original_pattern = 
     
             
-    def transform(self, param, func):
+    def transform_2(self, param, func):
         # update the transformed variable and redraw the results
         # apply non-linears in order
         # then apply linears

@@ -70,8 +70,8 @@ class NN:
         self.label = label
         self.sample_size = sample_size
         self.validation_data = validation_data
-        gamma = 21
-        label_smoothing = 0.8
+        gamma = 20
+        label_smoothing = 0.2
         self.model = tf.keras.Sequential()
         self.model.add(tf.keras.layers.Reshape(
             (self.sample_size, 2), input_shape=(2*sample_size,)))

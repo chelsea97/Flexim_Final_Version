@@ -14,7 +14,7 @@ from sklearn.ensemble import StackingClassifier
 from sklearn.linear_model import LogisticRegression
 
 class Active:
-    def __init__(self, un_labled_data, labeled_data,mx_iter=1):
+    def __init__(self, un_labled_data, labeled_data,mx_iter=5):
 	    # main part of the implementation goes here including
         # the initialization and definition of neural net and
         # active learning components. As an example:
@@ -90,12 +90,15 @@ class Active:
         label = self.learner.predict(data)
         return label
     
+    def predict_proba(self,data):
+        probability = self.learner.predict_proba(data)[:,1]
+        return probability
 
     def keras_model(self,labeled_data):
         lr = 2.16
         fl = 6
         sl = 9
-        gamma = 0
+        gamma = 10
         label_smoothing = 0
         print("active learning keras model run")
         print("gamma is {}".format(gamma))

@@ -62,6 +62,18 @@ class Pattern_Search:
         fig.tight_layout()
         plt.show()
     
+    def transform(self,original_data):
+        convert_list = []
+        original_row = original_data[0:self.sample_size].tolist()
+        transform_row = original_data[self.sample_size:2*self.sample_size].tolist()
+        row_list = []
+        for j in range(len(original_row)):
+            row_list.append(original_row.pop(0))
+            row_list.append(transform_row.pop(0))
+        convert_list.append(row_list)
+        convert_list = np.array(convert_list)
+        return convert_list
+    
     
     def cosine_similarity(self,array1,array2):
         cos_sim = dot(np.transpose(array1), array2) / (norm(array1) * norm(array2))
@@ -214,7 +226,9 @@ class Pattern_Search:
                     #print('yes')
                     #print("len of similar_pattern of main function {}".format(len(similar_pattern)))
                     append_pattern = np.append(query_pattern, similar_pattern)
-                    append_pattern = append_pattern.reshape(1,-1)
+                    append_pattern = self.transform(append_pattern)
+                    #append_pattern = append_pattern.reshape(1,2*self.sample_size)
+                    #print("append pattern shape is {}".format(append_pattern.shape))
                     #print(append_pattern.shape)
                     similarity_score = model.predict(append_pattern,verbose = 0)[0][0]
                     #print("similarity score of Flexim is {}".format(similarity_score))
