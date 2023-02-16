@@ -42,7 +42,7 @@ class GUI:
         self.frame2['relief']      = 'sunken'
         '''
         self.frame01 = ttk.Frame(self.root, style='TFrame', width=550, height=50); #self.frame01.place(x=500, y=585, width=550, height=200)
-        self.frame01.grid(row=0, column=1, columnspan=2, sticky='NEW')
+        self.frame01.grid(row=0, column=1, columnspan=2, sticky='NEWS')
         self.frame01['borderwidth'] = 2
         self.frame01['relief']      = 'sunken'
 
@@ -97,14 +97,14 @@ class GUI:
         #self.load_bttn.pack()
 
 
-        self.load_bttn.grid(row=0, column=1, padx=225, columnspan=1, sticky='SEW')
+        self.load_bttn.grid(row=0, column=1, padx=225, columnspan=1, sticky='NEWS')
         self.sample_bttn = ttk.Button(master=self.frame01, text='Start', command= lambda: self.core.sample(),
                                       state=DISABLED)
         #self.sample_bttn.pack()
-        self.sample_bttn.grid(row=1, column=1, padx=225, columnspan=1, sticky='NEW')
+        self.sample_bttn.grid(row=1, column=1, padx=225, columnspan=1, sticky='NEWS')
         self.win_label = ttk.Label(self.frame01, text="Width:")
         #self.win_label.place(x=180, y=55)
-        self.win_label.grid(row=2, column=1, padx=225, sticky='SEW')
+        self.win_label.grid(row=2, column=1, padx=225, sticky='NEWS')
         #self.sample_txt    = ttk.Entry(master=self.frame01, textvariable=self.core.sample_size, width=4, validate='all',
         #                               validatecommand=self.validate)
         #self.sample_txt.place(x=225, y=54)
@@ -127,9 +127,9 @@ class GUI:
         self.submit_bttn = ttk.Button(master=self.frame02, text='Submit', command=lambda: self.core.submit(),
                                       width=10, style='W.TButton', state=DISABLED)
         #self.submit_bttn.pack(side=BOTTOM)
-        self.check.grid(row=0, column=1, padx=250, columnspan=1, sticky='SEW')
-        self.submit_bttn.grid(row=1, column=1, padx=250, columnspan=1, sticky='NEW')
-        self.save_bttn.grid(row=2, column=1, padx=250, columnspan=1, sticky='NEW')
+        self.check.grid(row=0, column=1, padx=250, columnspan=1, sticky='NEWS')
+        self.submit_bttn.grid(row=1, column=1, padx=250, columnspan=1, sticky='NEWS')
+        self.save_bttn.grid(row=2, column=1, padx=250, columnspan=1, sticky='NEWS')
         #self.save_bttn.pack(side=BOTTOM)
 
 
@@ -137,7 +137,7 @@ class GUI:
 
     def __slides__(self):
         for s in self.scales:
-            s.pack_forget()
+            s.pack_forget() 
         for l in self.labels:
             l.pack_forget()
         funcs = self.core.get_non_linears()
@@ -199,9 +199,7 @@ class GUI:
         self.pb.place(x=85, y=85)
         self.core.gen_data_unlabel_complex_points(
             self.root, self.pb, instance_number)
-        
-        
-        
+           
     def deactivate_buttons(self):
         self.sample_bttn.configure(state=DISABLED)
         self.submit_bttn.configure(state=DISABLED)
